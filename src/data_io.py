@@ -242,19 +242,13 @@ def get_ordered_I16_list(path_):
     for file in file_paths:
         match = pattern.search(file)
         if match:
-            z_number = int(match.group(1))  # Ensure it's stored as an integer
-            file_dict[z_number] = os.path.join(path_, file)  # Store full path
-            print(f"Added key: {z_number}, Type: {type(z_number)}")  # Debugging line
+            z_number = int(match.group(1)) 
+            file_dict[z_number] = os.path.join(path_, file)  
+    
             file_list.append(z_number)
 
-    # Explicitly enforce integer sorting
     sorted_keys = sorted(file_dict.keys())  # Ensure keys are sorted as integers
     sorted_dict = {k: file_dict[k] for k in sorted_keys}
-
-    # Print sorted keys and their corresponding values
-    print("\nSorted Dictionary Output:")
-    for key in sorted_dict:
-        print(f"{key}: {sorted_dict[key]}")  # This should show sorted integer keys
 
     return sorted_dict.values()
 
