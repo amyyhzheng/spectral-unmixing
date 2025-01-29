@@ -1,3 +1,5 @@
+
+
 # +
 import os
 from skimage import io
@@ -12,6 +14,7 @@ import logging
 
 from collections import defaultdict
 import tifffile as tf
+import re
 
 
 def imread(fullpath, num_channels=None, verbose=False):
@@ -187,39 +190,73 @@ def get_tiff_stack(folder_path, num_channels):
 
 
 def get_ordered_I16_list(path_):
-    ordered_file_list = []
+    '''
+    Top commented out is old sorting function 
+    '''
+    # ordered_file_list = []
 
-    filetype_str = '.I16'
-    start_image = 'Z0.I16'
-    for filename in os.listdir(path_):
-        if start_image in filename:
-            idx = filename.find(filetype_str)
-            file_prefix = filename[:idx-1]
-            i=0
-            while True:
-                check_filename = f'{file_prefix}{i}{filetype_str}'
-                if os.path.exists(os.path.join(path_, check_filename)):
-                    i+=1
-                    #print(check_filename in ordered_file_list)
-                    if check_filename not in ordered_file_list:
-                        ordered_file_list.append(check_filename)
-                else:
-                    break
-    for filename in os.listdir(path_):
-        if filetype_str in filename:
-            i=0
-            idx = filename.find(filetype_str)
-            file_prefix = filename[:idx-1]
-            while True:
-                check_filename = f'{file_prefix}{i}{filetype_str}'
-                if os.path.exists(os.path.join(path_, check_filename)):
-                    i+=1
-                    #print(check_filename in ordered_file_list)
-                    if check_filename not in ordered_file_list:
-                        ordered_file_list.append(check_filename)
-                else:
-                    break
-    return ordered_file_list
+    # filetype_str = '.I16'
+    # start_image = 'Z0.I16'
+    # for filename in os.listdir(path_):
+    #     if start_image in filename:
+    #         idx = filename.find(filetype_str)
+    #         file_prefix = filename[:idx-1]
+    #         i=0
+    #         while True:
+    #             check_filename = f'{file_prefix}{i}{filetype_str}'
+    #             if os.path.exists(os.path.join(path_, check_filename)):
+    #                 i+=1
+    #                 #print(check_filename in ordered_file_list)
+    #                 if check_filename not in ordered_file_list:
+    #                     ordered_file_list.append(check_filename)
+    #             else:
+    #                 break
+    # for filename in os.listdir(path_):
+    #     if filetype_str in filename:
+    #         i=0
+    #         idx = filename.find(filetype_str)
+    #         file_prefix = filename[:idx-1]
+    #         while True:
+    #             check_filename = f'{file_prefix}{i}{filetype_str}'
+    #             if os.path.exists(os.path.join(path_, check_filename)):
+    #                 i+=1
+    #                 #print(check_filename in ordered_file_list)
+    #                 if check_filename not in ordered_file_list:
+    #                     ordered_file_list.append(check_filename)
+    #             else:
+    #                 break
+    # return ordered_file_list
+    if not os.path.exists(path_):
+        return {}
+
+    # Get all files in the folder that end with .I16
+    file_paths = [f for f in os.listdir(path_) if f.endswith('.I16')]
+
+    # Regex pattern to extract the number after 'Z' and before '.I16'
+    pattern = re.compile(r'_Z(\d+)\.I16$')
+
+    # Dictionary to store extracted numbers (as integers) and file paths
+    file_dict = {}
+    file_list = []
+
+    for file in file_paths:
+        match = pattern.search(file)
+        if match:
+            z_number = int(match.group(1))  # Ensure it's stored as an integer
+            file_dict[z_number] = os.path.join(path_, file)  # Store full path
+            print(f"Added key: {z_number}, Type: {type(z_number)}")  # Debugging line
+            file_list.append(z_number)
+
+    # Explicitly enforce integer sorting
+    sorted_keys = sorted(file_dict.keys())  # Ensure keys are sorted as integers
+    sorted_dict = {k: file_dict[k] for k in sorted_keys}
+
+    # Print sorted keys and their corresponding values
+    print("\nSorted Dictionary Output:")
+    for key in sorted_dict:
+        print(f"{key}: {sorted_dict[key]}")  # This should show sorted integer keys
+
+    return sorted_dict.values()
 
 def tiffify_filename(filename):
     if not('.tif' in filename[-5:]):
@@ -307,5 +344,3 @@ def umixing_app_save(cfg, image, new_image):
     if cfg.save_processed_tiff:
         new_filename = f"{cfg.filename}{bool(cfg.linearize_PMTs)*'_linearized'}{bool(cfg.unmix)*'_unmixed'}{bool(cfg.smoothing)*'_smoothed'}"
         write_composite_4d_tiff(new_image, cfg.save_path, new_filename, verbose=True, compression=cfg.compression)
-
-
