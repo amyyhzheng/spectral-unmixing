@@ -265,7 +265,7 @@ def write_composite_4d_tiff(image_stack: np.array , dirpath, filename, verbose=F
     reorder_axis = np.moveaxis(image_stack, -1, 1)
     if verbose:
         print(f'Saving image to {fullpath}')
-    tf.imwrite(fullpath, reorder_axis.astype('uint16'), kwargs, metadata={'axes': 'ZCYX'}, imagej=True) # imagej=False)compression='LZW')#
+    tf.imwrite(fullpath, reorder_axis.astype('uint16'), **kwargs, metadata={'axes': 'ZCYX'}, imagej=True)
     if verbose:
         print('Save complete')
 
