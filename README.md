@@ -51,7 +51,7 @@ Jupyter Notebook:
 ```bash
 conda activate spectral-unmixing
 cd path/to/spectral-unmixing
-cd app_scripts
+cd app_scripts IGNORE THIS
 jupyter Notebook
 ```
 OR double click the approproate "start_unmixing_app_windows" or "start_unmixing_app_mac" file or a shortcut to it
